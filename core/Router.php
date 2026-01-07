@@ -3,12 +3,11 @@
 class Router {
     private $routes = [];
 
-    public function get($uri, $action) {
-        $this->routes["GET"][$uri] = $action;
-    }
-
-    public function post($uri, $action) {
-        $this->routes["POST"][$uri] = $action;
+    public function add($method, $uri, $controller, $action) {
+        $this->routes[$method][$uri] = [
+            'controller' => $controller,
+            'action' => $action
+        ];
     }
 
     public function run() {
@@ -21,20 +20,35 @@ class Router {
 
         if (!isset($this->routes[$method][$uri])) {
             http_response_code(404);
-            echo "404 - Halaman tidak ditemukan";
-            return;
+            die("404 - Halaman tidak ditemukan: " . htmlspecialchars($uri));
         }
 
-        $action = $this->routes[$method][$uri];
-        $this->callAction($action);
+        $route = $this->routes[$method][$uri];
+        $this->callAction($route['controller'], $route['action']);
     }
 
-    private function callAction($action) {
-        list($file, $method) = explode("@", $action);
-        require_once $file . ".php";
+    private function callAction($controllerName, $method) {
+        // Tentukan folder berdasarkan nama Controller (tanpa kata Controller dan huruf kecil)
+        $folder = strtolower(str_replace('Controller', '', $controllerName));
+        
+        // Path absolut ke file controller
+        $path = dirname(__DIR__) . "/features/$folder/$controllerName.php";
 
-        $className = basename($file);
-        $controller = new $className();
-        $controller->$method();
+        if (file_exists($path)) {
+            require_once $path;
+            // Inisialisasi class
+            if (class_exists($controllerName)) {
+                $controller = new $controllerName();
+                if (method_exists($controller, $method)) {
+                    $controller->$method();
+                } else {
+                    die("Error: Method <b>$method</b> tidak ditemukan di class $controllerName");
+                }
+            } else {
+                die("Error: Class <b>$controllerName</b> tidak ditemukan di file $path");
+            }
+        } else {
+            die("Error: File Controller tidak ditemukan di: <b>$path</b>");
+        }
     }
 }
