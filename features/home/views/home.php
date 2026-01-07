@@ -36,16 +36,21 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <?php foreach ($umkm as $u): ?>
         <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group">
-            <div class="relative h-48 overflow-hidden">
-                <img src="<?= BASE_URL ?>/public/img/default-umkm.jpg" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+            <div class="relative h-48 overflow-hidden bg-gray-100">
+                <?php if (!empty($u['foto']) && file_exists("public/uploads/" . $u['foto'])): ?>
+                    <img src="<?= BASE_URL ?>/public/uploads/<?= $u['foto'] ?>" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                <?php else: ?>
+                    <img src="<?= BASE_URL ?>/public/img/default-umkm.jpg" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                <?php endif; ?>
+
                 <div class="absolute top-4 left-4">
                     <span class="bg-npcGreen text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">Unggulan</span>
                 </div>
             </div>
             <div class="p-6">
-                <h3 class="text-xl font-bold text-npcDark mb-2 group-hover:text-npcGreen transition"><?= $u["nama"] ?></h3>
+                <h3 class="text-xl font-bold text-npcDark mb-2 group-hover:text-npcGreen transition"><?= htmlspecialchars($u["nama"]) ?></h3>
                 <p class="text-gray-500 text-sm leading-relaxed mb-6">
-                    <?= substr($u["deskripsi"], 0, 100) ?>...
+                    <?= htmlspecialchars(substr($u["deskripsi"], 0, 100)) ?>...
                 </p>
                 <a href="<?= BASE_URL ?>/umkm/detail?id=<?= $u["id"] ?>" class="block w-full text-center py-3 rounded-xl bg-gray-50 text-npcDark font-bold hover:bg-npcGreen hover:text-white transition shadow-sm">
                     Lihat Detail
